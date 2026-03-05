@@ -146,7 +146,7 @@
 <div class="site-description">
   <div class="site-description-inner">
     <div class="site-desc-text">
-      <strong>The Ukraine Daily Stork</strong> aggregates the latest headlines from <strong>25 Ukrainian and international sources</strong> covering the conflict, politics, culture, and daily life — translated into English.
+      <strong>The Ukraine Daily Stork</strong> aggregates the latest headlines from <strong>20+ Ukrainian and international sources</strong> covering the conflict, politics, culture, and daily life — all in English.
     </div>
   </div>
 </div>
@@ -199,49 +199,46 @@
 
 // ─── FEED CONFIG ──────────────────────────────────────────────────────────────
 const FEEDS = [
-  // ── English — Ukrainian outlets ─────────────────────────────────────────────
-  { name: 'Kyiv Independent',        lang: 'en', tags: ['national','politics','war-front'],              url: 'https://kyivindependent.com/feed',                                                                       max: 8 },
-  { name: 'Kyiv Post',               lang: 'en', tags: ['national','politics'],                          url: 'https://kyivpost.com/rss',                                                                               max: 8 },
-  { name: 'New Voice of Ukraine',    lang: 'en', tags: ['national','diplomacy'],                         url: 'https://english.nv.ua/rss/all.rss',                                                                      max: 8 },
-  { name: 'Ukrinform (EN)',          lang: 'en', tags: ['national','war-front','diplomacy'],             url: 'https://www.ukrinform.net/rss/block-lastnews',                                                           max: 8 },
-  { name: 'Ukraine World',           lang: 'en', tags: ['national','humanitarian','diplomacy'],          url: 'https://ukraineworld.org/en/rss',                                                                        max: 6 },
+  // ── English — Ukrainian national outlets ────────────────────────────────────
+  { name: 'Kyiv Independent',        lang: 'en', tags: ['national','politics','war-front'],                  url: 'https://kyivindependent.com/feed',                                                                     max: 8 },
+  { name: 'Kyiv Post',               lang: 'en', tags: ['national','politics'],                              url: 'https://kyivpost.com/rss',                                                                             max: 8 },
+  { name: 'New Voice of Ukraine',    lang: 'en', tags: ['national','diplomacy','politics'],                  url: 'https://english.nv.ua/rss/all.rss',                                                                    max: 8 },
+  { name: 'Ukrinform',               lang: 'en', tags: ['national','war-front','diplomacy'],                 url: 'https://www.ukrinform.net/rss/block-lastnews',                                                         max: 8 },
+  { name: 'Ukraine World',           lang: 'en', tags: ['national','humanitarian','diplomacy'],              url: 'https://ukraineworld.org/en/rss',                                                                      max: 6 },
+  { name: 'The Kyiv Times',          lang: 'en', tags: ['national','politics'],                              url: 'https://thekyyivtimes.com/feed/',                                                                      max: 6 },
 
-  // ── Ukrainian-language (auto-translated) ────────────────────────────────────
-  { name: 'Ukrainska Pravda',        lang: 'uk', tags: ['national','politics'],                          url: 'https://www.pravda.com.ua/rss/',                                                                         max: 8 },
-  { name: 'Ukrainska Pravda · War',  lang: 'uk', tags: ['national','war-front'],                         url: 'https://www.pravda.com.ua/rss/view_war/',                                                                max: 8 },
-  { name: 'Suspilne News',           lang: 'uk', tags: ['national','regional'],                          url: 'https://suspilne.media/rss/news.rss',                                                                    max: 8 },
-  { name: 'Ukrinform (UA)',          lang: 'uk', tags: ['national','war-front'],                         url: 'https://www.ukrinform.ua/rss/block-lastnews',                                                            max: 6 },
-  { name: 'TSN',                     lang: 'uk', tags: ['national'],                                     url: 'https://tsn.ua/rss/full.rss',                                                                            max: 6 },
-  { name: 'Hromadske',               lang: 'uk', tags: ['national','regional','humanitarian'],           url: 'https://hromadske.ua/rss',                                                                               max: 6 },
-  { name: 'Detektor Media',          lang: 'uk', tags: ['national','politics'],                          url: 'https://detector.media/rss',                                                                             max: 6 },
+  // ── English — War & frontline ────────────────────────────────────────────────
+  { name: 'UA Wire',                 lang: 'en', tags: ['national','war-front','diplomacy'],                 url: 'https://uawire.org/feed',                                                                              max: 8 },
+  { name: 'Euromaidan Press',        lang: 'en', tags: ['national','humanitarian','politics','war-front'],   url: 'https://euromaidanpress.com/feed/',                                                                     max: 8 },
+  { name: 'Ukraine Pravda (EN)',     lang: 'en', tags: ['national','politics','war-front'],                  url: 'https://www.pravda.com.ua/eng/rss/',                                                                    max: 8 },
+
+  // ── English — Regional & humanitarian ───────────────────────────────────────
+  { name: 'Ukraine Crisis Media Ctr',lang: 'en', tags: ['humanitarian','diplomacy','regional'],              url: 'https://uacrisis.org/en/feed',                                                                         max: 6 },
+  { name: 'Kharkiv Human Rights',    lang: 'en', tags: ['regional','humanitarian'],                          url: 'https://khpg.org/en/rss',                                                                              max: 6 },
+  { name: 'Suspilne (EN)',           lang: 'en', tags: ['national','regional'],                              url: 'https://suspilne.media/rss/news.rss',                                                                  max: 6 },
 
   // ── International / wire ────────────────────────────────────────────────────
-  { name: 'RFE/RL Ukraine',          lang: 'en', tags: ['international','war-front','politics','diplomacy'], url: 'https://www.rferl.org/api/z_uo_-eiou_q',                                                            max: 8 },
-  { name: 'BBC Europe',              lang: 'en', tags: ['international','diplomacy'],                    url: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml',                                                     max: 8 },
-  { name: 'Reuters Ukraine',         lang: 'en', tags: ['international','war-front','diplomacy'],        url: 'https://news.google.com/rss/search?q=ukraine+site:reuters.com&hl=en-US&gl=US&ceid=US:en',               max: 8 },
-  { name: 'AP Ukraine',              lang: 'en', tags: ['international','war-front'],                    url: 'https://news.google.com/rss/search?q=ukraine+site:apnews.com&hl=en-US&gl=US&ceid=US:en',                max: 8 },
-  { name: 'Al Jazeera Ukraine',      lang: 'en', tags: ['international','humanitarian'],                 url: 'https://news.google.com/rss/search?q=ukraine+site:aljazeera.com&hl=en-US&gl=US&ceid=US:en',             max: 6 },
-  { name: 'DW Ukraine',              lang: 'en', tags: ['international','diplomacy','politics'],         url: 'https://rss.dw.com/rdf/rss-en-world',                                                                    max: 6 },
+  { name: 'RFE/RL Ukraine',          lang: 'en', tags: ['international','war-front','politics','diplomacy'], url: 'https://www.rferl.org/api/z_uo_-eiou_q',                                                              max: 8 },
+  { name: 'BBC Europe',              lang: 'en', tags: ['international','diplomacy'],                        url: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml',                                                   max: 8 },
+  { name: 'Reuters Ukraine',         lang: 'en', tags: ['international','war-front','diplomacy'],            url: 'https://news.google.com/rss/search?q=ukraine+site:reuters.com&hl=en-US&gl=US&ceid=US:en',             max: 8 },
+  { name: 'AP Ukraine',              lang: 'en', tags: ['international','war-front'],                        url: 'https://news.google.com/rss/search?q=ukraine+site:apnews.com&hl=en-US&gl=US&ceid=US:en',              max: 8 },
+  { name: 'Al Jazeera Ukraine',      lang: 'en', tags: ['international','humanitarian'],                     url: 'https://news.google.com/rss/search?q=ukraine+site:aljazeera.com&hl=en-US&gl=US&ceid=US:en',           max: 6 },
+  { name: 'DW Ukraine',              lang: 'en', tags: ['international','diplomacy','politics'],              url: 'https://rss.dw.com/rdf/rss-en-world',                                                                  max: 6 },
 
-  // ── Diaspora / NGO / specialist ─────────────────────────────────────────────
-  { name: 'Euromaidan Press',        lang: 'en', tags: ['national','humanitarian','politics'],           url: 'https://euromaidanpress.com/feed/',                                                                       max: 8 },
-  { name: 'UA Wire',                 lang: 'en', tags: ['national','war-front','diplomacy'],             url: 'https://uawire.org/feed',                                                                                max: 8 },
-  { name: 'Ukraine Crisis Media Ctr',lang: 'en', tags: ['humanitarian','diplomacy'],                     url: 'https://uacrisis.org/en/feed',                                                                           max: 6 },
-  { name: 'Atlantic Council',        lang: 'en', tags: ['international','diplomacy','politics'],         url: 'https://www.atlanticcouncil.org/blogs/ukrainealert/feed/',                                               max: 6 },
-  { name: 'Kharkiv Human Rights',    lang: 'en', tags: ['regional','humanitarian'],                      url: 'https://khpg.org/en/rss',                                                                                max: 6 },
-  { name: 'Ukrainer',                lang: 'uk', tags: ['regional','humanitarian'],                      url: 'https://ukrainer.net/en/feed/',                                                                          max: 6 },
-  { name: 'Liveuamap',               lang: 'en', tags: ['war-front'],                                    url: 'https://news.google.com/rss/search?q=ukraine+frontline+site:liveuamap.com&hl=en-US&gl=US&ceid=US:en',   max: 6 },
+  // ── Diplomacy & analysis ─────────────────────────────────────────────────────
+  { name: 'Atlantic Council',        lang: 'en', tags: ['international','diplomacy','politics'],              url: 'https://www.atlanticcouncil.org/blogs/ukrainealert/feed/',                                             max: 6 },
+  { name: 'CEPA Ukraine',            lang: 'en', tags: ['international','diplomacy','politics'],              url: 'https://cepa.org/feed/',                                                                               max: 6 },
+  { name: 'RUSI Ukraine',            lang: 'en', tags: ['international','war-front','diplomacy'],             url: 'https://www.rusi.org/feeds/rss/publications',                                                          max: 6 },
 ];
 
 // ─── UKRAINE RELEVANCE FILTER ─────────────────────────────────────────────────
 // Ukrainian and specialist sources get a free pass.
 // International wire sources (BBC, Reuters, AP, etc.) are filtered by keyword.
 const LOCAL_SOURCES = new Set([
-  'Kyiv Independent', 'Kyiv Post', 'New Voice of Ukraine', 'Ukrinform (EN)',
-  'Ukraine World', 'Ukrainska Pravda', 'Ukrainska Pravda · War', 'Suspilne News',
-  'Ukrinform (UA)', 'TSN', 'Hromadske', 'Detektor Media',
-  'Euromaidan Press', 'UA Wire', 'Ukraine Crisis Media Ctr',
-  'Kharkiv Human Rights', 'Ukrainer', 'Liveuamap', 'RFE/RL Ukraine',
+  'Kyiv Independent', 'Kyiv Post', 'New Voice of Ukraine', 'Ukrinform',
+  'Ukraine World', 'The Kyiv Times', 'UA Wire', 'Euromaidan Press',
+  'Ukraine Pravda (EN)', 'Ukraine Crisis Media Ctr', 'Kharkiv Human Rights',
+  'Suspilne (EN)', 'RFE/RL Ukraine', 'CEPA Ukraine',
 ]);
 
 const RELEVANCE_KEYWORDS = [
@@ -277,51 +274,8 @@ function isRelevant(article) {
 }
 
 // ─── TRANSLATION ──────────────────────────────────────────────────────────────
-// Throttled queue — max 3 concurrent requests to avoid rate-limit hammering.
-// Tries MyMemory first, falls back to a second MyMemory call with slight delay.
-const TRANSLATE_API = 'https://api.mymemory.translated.net/get';
-
-let _translateActive = 0;
-const _translateQueue = [];
-const TRANSLATE_CONCURRENCY = 3;
-
-function _translateNext() {
-  while (_translateActive < TRANSLATE_CONCURRENCY && _translateQueue.length) {
-    const { resolve, text, fromLang } = _translateQueue.shift();
-    _translateActive++;
-    _doTranslate(text, fromLang).then(result => {
-      _translateActive--;
-      resolve(result);
-      _translateNext();
-    });
-  }
-}
-
-async function _doTranslate(text, fromLang) {
-  // Try MyMemory up to 2 times with a short pause between
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 800));
-      const params = new URLSearchParams({ q: text.slice(0, 400), langpair: fromLang + '|en' });
-      const r = await fetch(TRANSLATE_API + '?' + params, { signal: AbortSignal.timeout(8000) });
-      const d = await r.json();
-      if (d.responseStatus === 200 && d.responseData?.translatedText) {
-        const t = d.responseData.translatedText;
-        // MyMemory sometimes echoes back the original on rate-limit — detect & retry
-        if (t && t !== text) return t;
-      }
-    } catch (e) {}
-  }
-  return text; // fallback: original text
-}
-
-function translate(text, fromLang = 'uk') {
-  if (!text || !text.trim()) return Promise.resolve(text);
-  return new Promise(resolve => {
-    _translateQueue.push({ resolve, text, fromLang });
-    _translateNext();
-  });
-}
+// All feeds are English — no translation needed. Stub kept for template compat.
+async function translate(text) { return text; }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let allArticles = [];
@@ -454,7 +408,7 @@ function renderCards(articles) {
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
     const ago = timeAgo(a.date);
-    const langLabel = a.lang !== 'en' ? 'UA translated' : 'EN';
+    const langLabel = 'EN';
     card.innerHTML =
       '<div class="card-meta">' +
         '<span class="card-source">' + a.source + '</span>' +
