@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ukraine Daily Stork</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --accent: #005BBB;
+    --accent2: #FFD500;
+    --text: #e8e4dc;
+    --text-muted: #7a7570;
+    --text-dim: #4a4540;
+    --green: #2ecc71;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  .logo { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; cursor: pointer; }
+  .logo-main { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--text); }
+  .logo-main span { color: var(--accent2); }
+  .logo-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .timestamp { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; }
+  .refresh-btn { background: var(--accent); color: white; border: none; padding: 8px 18px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 7px; border-radius: 2px; }
+  .refresh-btn:hover { filter: brightness(0.85); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .filter-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .filter-inner::-webkit-scrollbar { display: none; }
+  .filter-tab { padding: 12px 20px; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; font-family: 'IBM Plex Sans', sans-serif; }
+  .filter-tab:hover { color: var(--text); }
+  .filter-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* SITE DESCRIPTION */
+  .site-description { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; }
+  .site-description-inner { max-width: 1200px; margin: 0 auto; }
+  .site-desc-text { font-size: 0.78rem; color: var(--text-muted); font-weight: 300; line-height: 1.5; }
+  .site-desc-text strong { color: var(--text); font-weight: 500; }
+
+  /* SEARCH & TIME FILTER TOOLBAR */
+  .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 24px; }
+  .toolbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 180px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.85rem; pointer-events: none; }
+  .search-input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 0.8rem; padding: 7px 10px 7px 30px; border-radius: 2px; outline: none; transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--accent2); }
+  .search-input::placeholder { color: var(--text-dim); }
+  .time-filter-group { display: flex; gap: 2px; }
+  .time-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; cursor: pointer; transition: all 0.15s; border-radius: 2px; white-space: nowrap; }
+  .time-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .time-btn.active { background: var(--accent2); border-color: var(--accent2); color: #0e0e0e; font-weight: 500; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+  .status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 8px; }
+  .status-left { display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-muted); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.loading { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); animation: pulse 1s ease-in-out infinite; }
+  .dot.error { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .story-count { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-dim); }
+
+  .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .card { background: var(--surface); padding: 20px; transition: background 0.15s; display: flex; flex-direction: column; gap: 10px; cursor: pointer; text-decoration: none; color: inherit; }
+  .card:hover { background: var(--surface2); }
+  .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-source { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); }
+  .card-lang { font-family: 'IBM Plex Mono', monospace; font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.05em; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; line-height: 1.35; color: var(--text); }
+  .card-summary { font-size: 0.82rem; line-height: 1.6; color: var(--text-muted); font-weight: 300; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .card-time { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--text-dim); }
+  .card-arrow { font-size: 0.7rem; color: var(--text-dim); transition: color 0.15s, transform 0.15s; }
+  .card:hover .card-arrow { color: var(--accent2); transform: translateX(3px); }
+
+  .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .skeleton-card { background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .skel { background: var(--surface2); border-radius: 2px; animation: shimmer 1.5s ease-in-out infinite; }
+  @keyframes shimmer { 0%,100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+
+  .empty-state { text-align: center; padding: 80px 24px; color: var(--text-muted); }
+  .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 8px; color: var(--text-dim); }
+  .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+  .sources-panel { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .sources-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+  .sources-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .source-pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; padding: 4px 10px; border: 1px solid var(--border); color: var(--text-muted); letter-spacing: 0.05em; border-radius: 2px; }
+  .source-pill.ok { border-color: #1e3a1e; color: #4a9a4a; }
+  .source-pill.err { border-color: #3a1e1e; color: #9a4a4a; }
+
+  @media (max-width: 600px) {
+    .logo-sub { display: none; }
+    .timestamp { display: none; }
+    .header-inner { height: 56px; }
+    main { padding: 16px; }
+    .news-grid, .skeleton-grid { grid-template-columns: 1fr; }
+    .site-description { padding: 12px 16px; }
+    .toolbar { padding: 8px 16px; }
+    .time-btn { padding: 5px 7px; font-size: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="filterBy('all', document.querySelector('.filter-tab')); document.getElementById('searchInput').value=''; setTimeFilter(0, document.querySelector('.time-btn'));">
+      <div class="logo-main">Ukraine<span>Daily Stork</span></div>
+      <div class="logo-sub">News Dashboard</div>
+    </div>
+    <div class="header-right">
+      <div class="timestamp" id="timestamp">—</div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadAllFeeds()">
+        <span id="refreshIcon">↻</span> Refresh
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="filter-tab active" onclick="filterBy('all', this)">All Sources</button>
+    <button class="filter-tab" onclick="filterBy('national', this)">National</button>
+    <button class="filter-tab" onclick="filterBy('regional', this)">Regional</button>
+    <button class="filter-tab" onclick="filterBy('international', this)">International</button>
+    <button class="filter-tab" onclick="filterBy('war-front', this)">War &amp; Front</button>
+    <button class="filter-tab" onclick="filterBy('politics', this)">Politics</button>
+    <button class="filter-tab" onclick="filterBy('diplomacy', this)">Diplomacy</button>
+    <button class="filter-tab" onclick="filterBy('humanitarian', this)">Humanitarian</button>
+  </div>
+</div>
+
+<div class="site-description">
+  <div class="site-description-inner">
+    <div class="site-desc-text">
+      <strong>The Ukraine Daily Stork</strong> aggregates the latest headlines from <strong>25 Ukrainian and international sources</strong> covering the conflict, politics, culture, and daily life — translated into English.
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search headlines and summaries…" oninput="applyDisplayFilters()">
+    </div>
+    <div class="time-filter-group">
+      <button class="time-btn active" data-hours="0" onclick="setTimeFilter(0, this)">All time</button>
+      <button class="time-btn" data-hours="1" onclick="setTimeFilter(1, this)">1h</button>
+      <button class="time-btn" data-hours="6" onclick="setTimeFilter(6, this)">6h</button>
+      <button class="time-btn" data-hours="24" onclick="setTimeFilter(24, this)">24h</button>
+      <button class="time-btn" data-hours="72" onclick="setTimeFilter(72, this)">3d</button>
+      <button class="time-btn" data-hours="168" onclick="setTimeFilter(168, this)">7d</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="dot loading" id="statusDot"></div>
+      <span id="statusText">Loading feeds...</span>
+    </div>
+    <div class="story-count" id="storyCount"></div>
+  </div>
+  <div id="newsContainer">
+    <div class="skeleton-grid">
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:30%"></div><div class="skel" style="height:18px;width:90%"></div><div class="skel" style="height:14px;width:75%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:40%"></div><div class="skel" style="height:18px;width:85%"></div><div class="skel" style="height:14px;width:65%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:35%"></div><div class="skel" style="height:18px;width:92%"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:28%"></div><div class="skel" style="height:18px;width:88%"></div><div class="skel" style="height:14px;width:60%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:45%"></div><div class="skel" style="height:18px;width:80%"></div><div class="skel" style="height:14px;width:72%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+      <div class="skeleton-card"><div class="skel" style="height:10px;width:32%"></div><div class="skel" style="height:18px;width:95%"></div><div class="skel" style="height:14px;width:68%"></div><div class="skel" style="height:9px;width:20%"></div></div>
+    </div>
+  </div>
+  <div class="sources-panel">
+    <div class="sources-title">Sources</div>
+    <div class="sources-list" id="sourcesList"></div>
+  </div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// THE UKRAINE DAILY STORK — NEWS DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── FEED CONFIG ──────────────────────────────────────────────────────────────
+const FEEDS = [
+  // ── English — Ukrainian outlets ─────────────────────────────────────────────
+  { name: 'Kyiv Independent',        lang: 'en', tags: ['national','politics','war-front'],              url: 'https://kyivindependent.com/feed',                                                                       max: 8 },
+  { name: 'Kyiv Post',               lang: 'en', tags: ['national','politics'],                          url: 'https://kyivpost.com/rss',                                                                               max: 8 },
+  { name: 'New Voice of Ukraine',    lang: 'en', tags: ['national','diplomacy'],                         url: 'https://english.nv.ua/rss/all.rss',                                                                      max: 8 },
+  { name: 'Ukrinform (EN)',          lang: 'en', tags: ['national','war-front','diplomacy'],             url: 'https://www.ukrinform.net/rss/block-lastnews',                                                           max: 8 },
+  { name: 'Ukraine World',           lang: 'en', tags: ['national','humanitarian','diplomacy'],          url: 'https://ukraineworld.org/en/rss',                                                                        max: 6 },
+
+  // ── Ukrainian-language (auto-translated) ────────────────────────────────────
+  { name: 'Ukrainska Pravda',        lang: 'uk', tags: ['national','politics'],                          url: 'https://www.pravda.com.ua/rss/',                                                                         max: 8 },
+  { name: 'Ukrainska Pravda · War',  lang: 'uk', tags: ['national','war-front'],                         url: 'https://www.pravda.com.ua/rss/view_war/',                                                                max: 8 },
+  { name: 'Suspilne News',           lang: 'uk', tags: ['national','regional'],                          url: 'https://suspilne.media/rss/news.rss',                                                                    max: 8 },
+  { name: 'Ukrinform (UA)',          lang: 'uk', tags: ['national','war-front'],                         url: 'https://www.ukrinform.ua/rss/block-lastnews',                                                            max: 6 },
+  { name: 'TSN',                     lang: 'uk', tags: ['national'],                                     url: 'https://tsn.ua/rss/full.rss',                                                                            max: 6 },
+  { name: 'Hromadske',               lang: 'uk', tags: ['national','regional','humanitarian'],           url: 'https://hromadske.ua/rss',                                                                               max: 6 },
+  { name: 'Detektor Media',          lang: 'uk', tags: ['national','politics'],                          url: 'https://detector.media/rss',                                                                             max: 6 },
+
+  // ── International / wire ────────────────────────────────────────────────────
+  { name: 'RFE/RL Ukraine',          lang: 'en', tags: ['international','war-front','politics','diplomacy'], url: 'https://www.rferl.org/api/z_uo_-eiou_q',                                                            max: 8 },
+  { name: 'BBC Europe',              lang: 'en', tags: ['international','diplomacy'],                    url: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml',                                                     max: 8 },
+  { name: 'Reuters Ukraine',         lang: 'en', tags: ['international','war-front','diplomacy'],        url: 'https://news.google.com/rss/search?q=ukraine+site:reuters.com&hl=en-US&gl=US&ceid=US:en',               max: 8 },
+  { name: 'AP Ukraine',              lang: 'en', tags: ['international','war-front'],                    url: 'https://news.google.com/rss/search?q=ukraine+site:apnews.com&hl=en-US&gl=US&ceid=US:en',                max: 8 },
+  { name: 'Al Jazeera Ukraine',      lang: 'en', tags: ['international','humanitarian'],                 url: 'https://news.google.com/rss/search?q=ukraine+site:aljazeera.com&hl=en-US&gl=US&ceid=US:en',             max: 6 },
+  { name: 'DW Ukraine',              lang: 'en', tags: ['international','diplomacy','politics'],         url: 'https://rss.dw.com/rdf/rss-en-world',                                                                    max: 6 },
+
+  // ── Diaspora / NGO / specialist ─────────────────────────────────────────────
+  { name: 'Euromaidan Press',        lang: 'en', tags: ['national','humanitarian','politics'],           url: 'https://euromaidanpress.com/feed/',                                                                       max: 8 },
+  { name: 'UA Wire',                 lang: 'en', tags: ['national','war-front','diplomacy'],             url: 'https://uawire.org/feed',                                                                                max: 8 },
+  { name: 'Ukraine Crisis Media Ctr',lang: 'en', tags: ['humanitarian','diplomacy'],                     url: 'https://uacrisis.org/en/feed',                                                                           max: 6 },
+  { name: 'Atlantic Council',        lang: 'en', tags: ['international','diplomacy','politics'],         url: 'https://www.atlanticcouncil.org/blogs/ukrainealert/feed/',                                               max: 6 },
+  { name: 'Kharkiv Human Rights',    lang: 'en', tags: ['regional','humanitarian'],                      url: 'https://khpg.org/en/rss',                                                                                max: 6 },
+  { name: 'Ukrainer',                lang: 'uk', tags: ['regional','humanitarian'],                      url: 'https://ukrainer.net/en/feed/',                                                                          max: 6 },
+  { name: 'Liveuamap',               lang: 'en', tags: ['war-front'],                                    url: 'https://news.google.com/rss/search?q=ukraine+frontline+site:liveuamap.com&hl=en-US&gl=US&ceid=US:en',   max: 6 },
+];
+
+// ─── UKRAINE RELEVANCE FILTER ─────────────────────────────────────────────────
+// Ukrainian and specialist sources get a free pass.
+// International wire sources (BBC, Reuters, AP, etc.) are filtered by keyword.
+const LOCAL_SOURCES = new Set([
+  'Kyiv Independent', 'Kyiv Post', 'New Voice of Ukraine', 'Ukrinform (EN)',
+  'Ukraine World', 'Ukrainska Pravda', 'Ukrainska Pravda · War', 'Suspilne News',
+  'Ukrinform (UA)', 'TSN', 'Hromadske', 'Detektor Media',
+  'Euromaidan Press', 'UA Wire', 'Ukraine Crisis Media Ctr',
+  'Kharkiv Human Rights', 'Ukrainer', 'Liveuamap', 'RFE/RL Ukraine',
+]);
+
+const RELEVANCE_KEYWORDS = [
+  // Country & people
+  'ukraine','ukrainian','ukrainians','україна','київ',
+  // Cities & regions
+  'kyiv','kharkiv','odesa','odessa','lviv','mariupol','zaporizhzhia','zaporizhia',
+  'kherson','dnipro','mykolaiv','bakhmut','avdiivka','donetsk','luhansk',
+  'kramatorsk','sumy','chernihiv','poltava','vinnytsia','uzhhorod',
+  // Conflict
+  'zelensky','zelenskyy','putin','kremlin','russia','russian army','russian forces',
+  'war in ukraine','invasion','frontline','front line','ceasefire','nato',
+  'azov','zaluzhnyi','syrskyi','mobilization','mobilisation','shelling',
+  'missile strike','drone attack','wagner','blacksea','black sea',
+  // Diplomacy & institutions
+  'zelenskyy','volodymyr','verkhovna rada','naftogaz','ukrenergo',
+  'un ukraine','imf ukraine','eu ukraine','european union ukraine',
+  'aid to ukraine','weapons ukraine','sanctions russia',
+  // Humanitarian
+  'refugees ukraine','displaced ukraine','humanitarian corridor','reconstruction ukraine',
+  // Cultural
+  'holodomor','maidan','euromaidan','ukrainian language','bbc ukraine',
+];
+
+function isRelevant(article) {
+  if (LOCAL_SOURCES.has(article.source)) return true;
+  if (!RELEVANCE_KEYWORDS.length) return true;
+  const haystack = (
+    article.title + ' ' + article.summary + ' ' +
+    (article.rawTitle || '') + ' ' + (article.rawSummary || '')
+  ).toLowerCase();
+  return RELEVANCE_KEYWORDS.some(kw => haystack.includes(kw));
+}
+
+// ─── TRANSLATION ──────────────────────────────────────────────────────────────
+const TRANSLATE_API = 'https://api.mymemory.translated.net/get';
+async function translate(text, fromLang = 'uk') {
+  if (!text || !text.trim()) return text;
+  try {
+    const params = new URLSearchParams({ q: text.slice(0, 500), langpair: fromLang + '|en' });
+    const r = await fetch(TRANSLATE_API + '?' + params, { signal: AbortSignal.timeout(6000) });
+    const d = await r.json();
+    if (d.responseStatus === 200 && d.responseData?.translatedText) return d.responseData.translatedText;
+  } catch (e) {}
+  return text;
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let allArticles = [];
+let sourceStatus = {};
+let currentFilter = 'all';
+let currentTimeHours = 0;
+
+// ─── PROXY HELPERS ────────────────────────────────────────────────────────────
+function parseRSSXml(xml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'text/xml');
+  const items = [...doc.querySelectorAll('item')];
+  if (!items.length) throw new Error('No items');
+  return items.map(item => {
+    let link = '';
+    const linkEl = item.querySelector('link');
+    if (linkEl) {
+      link = linkEl.textContent || linkEl.getAttribute('href') || '';
+      if (!link && linkEl.nextSibling) link = linkEl.nextSibling.textContent || '';
+    }
+    if (!link) link = item.querySelector('guid')?.textContent || '#';
+    return {
+      title: item.querySelector('title')?.textContent || '',
+      description: item.querySelector('description')?.textContent || '',
+      link: link.trim(),
+      pubDate: item.querySelector('pubDate')?.textContent || '',
+    };
+  });
+}
+
+async function tryRss2Json(url) {
+  const r = await fetch('https://api.rss2json.com/v1/api.json?count=8&rss_url=' + encodeURIComponent(url), { signal: AbortSignal.timeout(9000) });
+  const d = await r.json();
+  if (d.status !== 'ok' || !d.items?.length) throw new Error('rss2json: no items');
+  return d.items.map(i => ({ title: i.title, description: i.description, link: i.link || i.guid, pubDate: i.pubDate }));
+}
+
+async function tryAllOrigins(url) {
+  const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url), { signal: AbortSignal.timeout(9000) });
+  const d = await r.json();
+  if (!d.contents) throw new Error('allorigins: empty');
+  return parseRSSXml(d.contents);
+}
+
+async function tryCorsProxy(url) {
+  const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), { signal: AbortSignal.timeout(9000) });
+  const xml = await r.text();
+  return parseRSSXml(xml);
+}
+
+async function fetchFeedItems(url) {
+  for (const fn of [tryRss2Json, tryAllOrigins, tryCorsProxy]) {
+    try {
+      const items = await fn(url);
+      if (items && items.length) return items;
+    } catch (e) {}
+  }
+  throw new Error('All proxies failed for: ' + url);
+}
+
+// ─── FETCH ONE FEED ───────────────────────────────────────────────────────────
+async function fetchFeed(feed) {
+  try {
+    const items = await fetchFeedItems(feed.url);
+    const articles = await Promise.all(items.slice(0, feed.max || 8).map(async item => {
+      let title = item.title || '';
+      let summary = (item.description || '').replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+      if (summary.length > 180) summary = summary.slice(0, 180) + '…';
+      const rawTitle = title;
+      const rawSummary = summary;
+      if (feed.lang && feed.lang !== 'en') {
+        [title, summary] = await Promise.all([
+          translate(title, feed.lang),
+          summary ? translate(summary, feed.lang) : Promise.resolve('')
+        ]);
+      }
+      return {
+        title: title.trim(),
+        summary: summary.trim(),
+        rawTitle: rawTitle.trim(),
+        rawSummary: rawSummary.trim(),
+        link: item.link || '#',
+        source: feed.name,
+        lang: feed.lang,
+        tags: feed.tags,
+        date: item.pubDate ? new Date(item.pubDate) : new Date(),
+      };
+    }));
+    sourceStatus[feed.name] = 'ok';
+    return articles.filter(a => a.title && isRelevant(a));
+  } catch (e) {
+    sourceStatus[feed.name] = 'error';
+    return [];
+  }
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function timeAgo(date) {
+  const diff = (Date.now() - date.getTime()) / 1000;
+  if (isNaN(diff) || diff < 0) return '';
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+function renderCards(articles) {
+  const container = document.getElementById('newsContainer');
+  container.innerHTML = '';
+
+  if (!articles.length) {
+    container.innerHTML = '<div class="empty-state"><h3>No stories found</h3><p>Some feeds may be temporarily unavailable.<br>Check the source status below or try refreshing.</p></div>';
+    document.getElementById('storyCount').textContent = '0 stories';
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'news-grid';
+
+  articles.forEach(a => {
+    const card = document.createElement('a');
+    card.className = 'card';
+    card.href = a.link;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    const ago = timeAgo(a.date);
+    const langLabel = a.lang !== 'en' ? 'UA translated' : 'EN';
+    card.innerHTML =
+      '<div class="card-meta">' +
+        '<span class="card-source">' + a.source + '</span>' +
+        '<span class="card-lang">' + langLabel + '</span>' +
+      '</div>' +
+      '<div class="card-title">' + a.title + '</div>' +
+      (a.summary ? '<div class="card-summary">' + a.summary + '</div>' : '') +
+      '<div class="card-footer">' +
+        '<span class="card-time">' + ago + '</span>' +
+        '<span class="card-arrow">&#x2192;</span>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+  document.getElementById('storyCount').textContent = articles.length + ' stor' + (articles.length !== 1 ? 'ies' : 'y');
+}
+
+function renderSourcePills() {
+  const list = document.getElementById('sourcesList');
+  list.innerHTML = FEEDS.map(f => {
+    const s = sourceStatus[f.name];
+    const cls = s === 'ok' ? 'ok' : s === 'error' ? 'err' : '';
+    return '<span class="source-pill ' + cls + '">' + f.name + '</span>';
+  }).join('');
+}
+
+// ─── SEARCH & TIME FILTER ─────────────────────────────────────────────────────
+function setTimeFilter(hours, el) {
+  currentTimeHours = hours;
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyDisplayFilters();
+}
+
+function applyDisplayFilters() {
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
+  let filtered;
+  if (currentFilter === 'all') {
+    filtered = [...allArticles];
+  } else {
+    filtered = allArticles.filter(a => a.tags.includes(currentFilter));
+  }
+
+  if (currentTimeHours > 0) {
+    const cutoff = Date.now() - currentTimeHours * 3600 * 1000;
+    filtered = filtered.filter(a => a.date && a.date.getTime() >= cutoff);
+  }
+
+  if (query) {
+    filtered = filtered.filter(a =>
+      a.title.toLowerCase().includes(query) ||
+      (a.summary && a.summary.toLowerCase().includes(query))
+    );
+  }
+
+  renderCards(filtered);
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────────────
+function filterBy(tag, el) {
+  currentFilter = tag;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  applyDisplayFilters();
+}
+
+// ─── MAIN LOAD ────────────────────────────────────────────────────────────────
+async function loadAllFeeds() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  const dot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+
+  btn.classList.add('loading');
+  icon.className = 'spin';
+  icon.textContent = '↻';
+  dot.className = 'dot loading';
+  statusText.textContent = 'Fetching feeds…';
+  sourceStatus = {};
+
+  document.getElementById('newsContainer').innerHTML =
+    '<div class="skeleton-grid">' +
+    Array(6).fill('<div class="skeleton-card"><div class="skel" style="height:10px;width:30%;margin-bottom:4px"></div><div class="skel" style="height:18px;width:88%"></div><div class="skel" style="height:13px;width:70%"></div><div class="skel" style="height:9px;width:20%"></div></div>').join('') +
+    '</div>';
+
+  const results = await Promise.allSettled(FEEDS.map(f => fetchFeed(f)));
+  const rawArticles = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
+  allArticles = rawArticles.sort((a, b) => b.date - a.date);
+
+  const okCount = Object.values(sourceStatus).filter(s => s === 'ok').length;
+  const errCount = Object.values(sourceStatus).filter(s => s === 'error').length;
+
+  dot.className = okCount === 0 ? 'dot error' : 'dot';
+  statusText.textContent = okCount + ' source' + (okCount !== 1 ? 's' : '') + ' loaded' +
+    (errCount ? ' · ' + errCount + ' unavailable' : '');
+
+  btn.classList.remove('loading');
+  icon.className = '';
+  icon.textContent = '↻';
+  document.getElementById('timestamp').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  renderSourcePills();
+  applyDisplayFilters();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadAllFeeds();
+</script>
+</body>
+</html>
