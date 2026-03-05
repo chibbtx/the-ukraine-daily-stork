@@ -277,16 +277,50 @@ function isRelevant(article) {
 }
 
 // ─── TRANSLATION ──────────────────────────────────────────────────────────────
+// Throttled queue — max 3 concurrent requests to avoid rate-limit hammering.
+// Tries MyMemory first, falls back to a second MyMemory call with slight delay.
 const TRANSLATE_API = 'https://api.mymemory.translated.net/get';
-async function translate(text, fromLang = 'uk') {
-  if (!text || !text.trim()) return text;
-  try {
-    const params = new URLSearchParams({ q: text.slice(0, 500), langpair: fromLang + '|en' });
-    const r = await fetch(TRANSLATE_API + '?' + params, { signal: AbortSignal.timeout(6000) });
-    const d = await r.json();
-    if (d.responseStatus === 200 && d.responseData?.translatedText) return d.responseData.translatedText;
-  } catch (e) {}
-  return text;
+
+let _translateActive = 0;
+const _translateQueue = [];
+const TRANSLATE_CONCURRENCY = 3;
+
+function _translateNext() {
+  while (_translateActive < TRANSLATE_CONCURRENCY && _translateQueue.length) {
+    const { resolve, text, fromLang } = _translateQueue.shift();
+    _translateActive++;
+    _doTranslate(text, fromLang).then(result => {
+      _translateActive--;
+      resolve(result);
+      _translateNext();
+    });
+  }
+}
+
+async function _doTranslate(text, fromLang) {
+  // Try MyMemory up to 2 times with a short pause between
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 800));
+      const params = new URLSearchParams({ q: text.slice(0, 400), langpair: fromLang + '|en' });
+      const r = await fetch(TRANSLATE_API + '?' + params, { signal: AbortSignal.timeout(8000) });
+      const d = await r.json();
+      if (d.responseStatus === 200 && d.responseData?.translatedText) {
+        const t = d.responseData.translatedText;
+        // MyMemory sometimes echoes back the original on rate-limit — detect & retry
+        if (t && t !== text) return t;
+      }
+    } catch (e) {}
+  }
+  return text; // fallback: original text
+}
+
+function translate(text, fromLang = 'uk') {
+  if (!text || !text.trim()) return Promise.resolve(text);
+  return new Promise(resolve => {
+    _translateQueue.push({ resolve, text, fromLang });
+    _translateNext();
+  });
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -352,23 +386,29 @@ async function fetchFeedItems(url) {
 async function fetchFeed(feed) {
   try {
     const items = await fetchFeedItems(feed.url);
+    const needsTranslation = feed.lang && feed.lang !== 'en';
     const articles = await Promise.all(items.slice(0, feed.max || 8).map(async item => {
-      let title = item.title || '';
-      let summary = (item.description || '').replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
-      if (summary.length > 180) summary = summary.slice(0, 180) + '…';
-      const rawTitle = title;
-      const rawSummary = summary;
-      if (feed.lang && feed.lang !== 'en') {
+      const rawTitle = (item.title || '').trim();
+      let rawSummary = (item.description || '').replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+      if (rawSummary.length > 180) rawSummary = rawSummary.slice(0, 180) + '…';
+
+      let title = rawTitle;
+      let summary = rawSummary;
+
+      if (needsTranslation && rawTitle) {
         [title, summary] = await Promise.all([
-          translate(title, feed.lang),
-          summary ? translate(summary, feed.lang) : Promise.resolve('')
+          translate(rawTitle, feed.lang),
+          rawSummary ? translate(rawSummary, feed.lang) : Promise.resolve(''),
         ]);
+        if (!title) title = rawTitle;
+        if (!summary) summary = rawSummary;
       }
+
       return {
         title: title.trim(),
         summary: summary.trim(),
-        rawTitle: rawTitle.trim(),
-        rawSummary: rawSummary.trim(),
+        rawTitle,
+        rawSummary,
         link: item.link || '#',
         source: feed.name,
         lang: feed.lang,
