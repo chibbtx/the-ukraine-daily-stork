@@ -200,12 +200,12 @@
 // ─── FEED CONFIG ──────────────────────────────────────────────────────────────
 const FEEDS = [
   // ── English — Ukrainian national outlets ────────────────────────────────────
-  { name: 'Kyiv Independent',        lang: 'en', tags: ['national','politics','war-front'],                  url: 'https://kyivindependent.com/feed',                                                                     max: 8 },
-  { name: 'Kyiv Post',               lang: 'en', tags: ['national','politics'],                              url: 'https://kyivpost.com/rss',                                                                             max: 8 },
+  { name: 'Kyiv Independent',        lang: 'en', tags: ['national','politics','war-front'],                  url: 'https://kyivindependent.com/feed/news/',                                                                     max: 8 },
+  { name: 'Kyiv Post',               lang: 'en', tags: ['national','politics'],                              url: 'https://www.kyivpost.com/feed',                                                                             max: 8 },
   { name: 'New Voice of Ukraine',    lang: 'en', tags: ['national','diplomacy','politics'],                  url: 'https://english.nv.ua/rss/all.rss',                                                                    max: 8 },
   { name: 'Ukrinform',               lang: 'en', tags: ['national','war-front','diplomacy'],                 url: 'https://www.ukrinform.net/rss/block-lastnews',                                                         max: 8 },
   { name: 'Ukraine World',           lang: 'en', tags: ['national','humanitarian','diplomacy'],              url: 'https://ukraineworld.org/en/rss',                                                                      max: 6 },
-  { name: 'The Kyiv Times',          lang: 'en', tags: ['national','politics'],                              url: 'https://thekyyivtimes.com/feed/',                                                                      max: 6 },
+  { name: 'Interfax Ukraine',        lang: 'en', tags: ['national','politics','war-front'],                  url: 'https://en.interfax.com.ua/news/last.rss',                                                             max: 6 },
 
   // ── English — War & frontline ────────────────────────────────────────────────
   { name: 'UA Wire',                 lang: 'en', tags: ['national','war-front','diplomacy'],                 url: 'https://uawire.org/feed',                                                                              max: 8 },
@@ -214,7 +214,7 @@ const FEEDS = [
 
   // ── English — Regional & humanitarian ───────────────────────────────────────
   { name: 'Ukraine Crisis Media Ctr',lang: 'en', tags: ['humanitarian','diplomacy','regional'],              url: 'https://uacrisis.org/en/feed',                                                                         max: 6 },
-  { name: 'Kharkiv Human Rights',    lang: 'en', tags: ['regional','humanitarian'],                          url: 'https://khpg.org/en/rss',                                                                              max: 6 },
+  { name: 'UNIAN English',           lang: 'en', tags: ['national','war-front','regional'],                  url: 'https://rss.unian.net/site/news_eng.rss',                                                              max: 6 },
   { name: 'Suspilne (EN)',           lang: 'en', tags: ['national','regional'],                              url: 'https://suspilne.media/rss/news.rss',                                                                  max: 6 },
 
   // ── International / wire ────────────────────────────────────────────────────
@@ -228,7 +228,7 @@ const FEEDS = [
   // ── Diplomacy & analysis ─────────────────────────────────────────────────────
   { name: 'Atlantic Council',        lang: 'en', tags: ['international','diplomacy','politics'],              url: 'https://www.atlanticcouncil.org/blogs/ukrainealert/feed/',                                             max: 6 },
   { name: 'CEPA Ukraine',            lang: 'en', tags: ['international','diplomacy','politics'],              url: 'https://cepa.org/feed/',                                                                               max: 6 },
-  { name: 'RUSI Ukraine',            lang: 'en', tags: ['international','war-front','diplomacy'],             url: 'https://www.rusi.org/feeds/rss/publications',                                                          max: 6 },
+  { name: 'Guardian Ukraine',        lang: 'en', tags: ['international','war-front','diplomacy'],             url: 'https://www.theguardian.com/world/ukraine/rss',                                                        max: 6 },
 ];
 
 // ─── UKRAINE RELEVANCE FILTER ─────────────────────────────────────────────────
@@ -236,8 +236,8 @@ const FEEDS = [
 // International wire sources (BBC, Reuters, AP, etc.) are filtered by keyword.
 const LOCAL_SOURCES = new Set([
   'Kyiv Independent', 'Kyiv Post', 'New Voice of Ukraine', 'Ukrinform',
-  'Ukraine World', 'The Kyiv Times', 'UA Wire', 'Euromaidan Press',
-  'Ukraine Pravda (EN)', 'Ukraine Crisis Media Ctr', 'Kharkiv Human Rights',
+  'Ukraine World', 'Interfax Ukraine', 'UA Wire', 'Euromaidan Press',
+  'Ukraine Pravda (EN)', 'Ukraine Crisis Media Ctr', 'UNIAN English',
   'Suspilne (EN)', 'RFE/RL Ukraine', 'CEPA Ukraine',
 ]);
 
